@@ -1,0 +1,61 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial gsmSerial(3, 2); // RX, TX for GSM module
+
+// Define the pins for the LEDs
+const int redPin = 13;   // Changed to avoid onboard LED interference
+const int yellowPin = 12; // Changed to avoid onboard LED interference
+const int greenPin = 11;  // Changed to avoid onboard LED interference
+
+void setup() {
+  // Initialize the LED pins as outputs
+  pinMode(redPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+
+  // Initialize serial communication with GSM module
+  gsmSerial.begin(9600);
+  // Optional: Initialize Serial Monitor for debugging
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Red light
+  digitalWrite(redPin, HIGH);
+  digitalWrite(yellowPin, LOW);
+  digitalWrite(greenPin, LOW);
+  delay(3000);  // Wait for 5 seconds
+  sendSMS("Red Signal In Bypass traffic Signal Take diversion !!!");
+
+  // Yellow light
+  digitalWrite(redPin, LOW);
+  digitalWrite(yellowPin, HIGH);
+  digitalWrite(greenPin, LOW);
+  delay(2000);  // Wait for 2 seconds
+
+  // Green light
+  digitalWrite(redPin, LOW);
+  digitalWrite(yellowPin, LOW);
+  digitalWrite(greenPin, HIGH);
+  delay(3000);  // Wait for 5 seconds
+//  sendSMS("Green Signal Active");
+
+  // Yellow light before Red (transition)
+  digitalWrite(redPin, LOW);
+  digitalWrite(yellowPin, HIGH);
+  digitalWrite(greenPin, LOW);
+   delay(1000);  // Wait for 2 seconds
+}
+
+void sendSMS(String message) {
+  gsmSerial.println("AT+CMGF=1");  // Set SMS mode to text
+  delay(1000);
+  gsmSerial.println("AT+CMGS=\"+916372136143\""); // Replace with your registered number
+  delay(1000);
+  gsmSerial.println(message);
+  delay(1000);
+  gsmSerial.println((char)26); // End of message character
+  delay(1000);
+  // Optional: Print message to Serial Monitor for debugging
+  Serial.println("Message Sent: " + message);
+}
